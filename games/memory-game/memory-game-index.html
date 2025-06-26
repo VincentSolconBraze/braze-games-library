@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braze Memory Game</title>
+    <style>
+        /* CSS Variables for easy customization */
+        :root {
+            --primary-color: #FF6B35;      /* Braze Orange */
+            --secondary-color: #F7931E;    /* Braze Secondary Orange */
+            --accent-color: #A333C8;       /* Purple */
+            --success-color: #21BA45;      /* Green */
+            --error-color: #DB2828;        /* Red */
+            --dark-color: #1B1C1D;         /* Dark Gray */
+            --light-color: #FFFFFF;        /* White */
+            --gray-color: #767676;         /* Medium Gray */
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-back-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--background-gradient);
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Game Container */
+        #game-container {
+            background: var(--light-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--gray-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--dark-color);
+            transition: all var(--transition-speed) ease;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: var(--light-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .game-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: var(--card-back-gradient);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            transform: rotate(-5deg);
+            transition: transform var(--transition-speed) ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+        }
+
+        .game-logo:hover {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .game-title {
+            color: var(--dark-color);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .game-subtitle {
+            color: var(--gray-color);
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--card-back-gradient);
+            color: var(--light-color);
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+            outline: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #7c3aed 100%);
+            margin-left: 10px;
+        }
+
+        /* Game Screen */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .game-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--card-back-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .stat-value {
+            color: var(--primary-color);
+        }
+
+        /* Memory Grid */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 480px) {
+            .memory-grid {
+                gap: 10px;
+            }
+        }
+
+        /* Memory Cards */
+        .memory-card {
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            animation: matchBounce 0.6s ease;
+        }
+
+        @keyframes matchBounce {
+            0% { transform: scale(1) rotateY(180deg); }
+            40% { transform: scale(1.15) rotateY(180deg); }
+            100% { transform: scale(1) rotateY(180deg); }
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .card-front {
+            background: var(--card-back-gradient);
+            color: var(--light-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-front:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-back {
+            background: var(--light-color);
+            transform: rotateY(180deg);
+            border: 3px solid #f0f0f0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .memory-card.matched .card-back {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-color: var(--success-color);
+        }
+
+        /* Completion Screen */
+        .completion-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .trophy-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: trophy-bounce 2s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes trophy-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        .completion-title {
+            color: var(--dark-color);
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .completion-message {
+            color: var(--gray-color);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        /* Stats Display */
+        .stats-container {
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--gray-color);
+            font-size: 16px;
+        }
+
+        .stat-result {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* Reward Display */
+        .reward-display {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(253, 203, 110, 0.3);
+        }
+
+        .reward-label {
+            color: var(--dark-color);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .reward-value {
+            color: var(--dark-color);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        /* Difficulty Selector */
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: var(--light-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-weight: 600;
+            color: var(--gray-color);
+        }
+
+        .difficulty-btn.active {
+            background: var(--card-back-gradient);
+            color: var(--light-color);
+            border-color: transparent;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--card-back-gradient);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .memory-card:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            #game-container {
+                padding: 20px;
+            }
+
+            .game-title {
+                font-size: 26px;
+            }
+
+            .game-subtitle {
+                font-size: 16px;
+            }
+
+            .memory-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .card-face {
+                font-size: 28px;
+            }
+
+            .btn {
+                padding: 14px 30px;
+                font-size: 16px;
+            }
+
+            .completion-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" role="main" aria-label="Memory Game">
+        <button class="close-btn" aria-label="Close game" onclick="closeGame()">×</button>
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-screen">
+                <div class="game-logo" aria-hidden="true">🧠</div>
+                <h1 class="game-title">Memory Master</h1>
+                <p class="game-subtitle">
+                    Match all the pairs as quickly as possible to unlock amazing rewards!
+                </p>
+                
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn active" data-level="easy" onclick="selectDifficulty('easy')">
+                        Easy (3×4)
+                    </button>
+                    <button class="difficulty-btn" data-level="medium" onclick="selectDifficulty('medium')">
+                        Medium (4×4)
+                    </button>
+                    <button class="difficulty-btn" data-level="hard" onclick="selectDifficulty('hard')">
+                        Hard (4×5)
+                    </button>
+                </div>
+
+                <button class="btn" onclick="startGame()" aria-label="Start game">
+                    Start Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="game-stat">
+                    <div class="stat-icon" aria-hidden="true">⏱️</div>
+                    <span>Time: <span class="stat-value" id="timer-display">0:00</span></span>
+                </div>
+                <div class="game-stat">
+                    <div class="stat-icon" aria-hidden="true">👆</div>
+                    <span>Moves: <span class="stat-value" id="moves-display">0</span></span>
+                </div>
+                <div class="game-stat">
+                    <div class="stat-icon" aria-hidden="true">🎯</div>
+                    <span>Pairs: <span class="stat-value" id="pairs-display">0/6</span></span>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div id="memory-grid" class="memory-grid" role="grid" aria-label="Memory card grid">
+                <!-- Cards will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completion-screen" class="screen">
+            <div class="completion-screen">
+                <div class="trophy-icon" aria-hidden="true">🏆</div>
+                <h2 class="completion-title">Congratulations!</h2>
+                <p class="completion-message">
+                    You've mastered the memory challenge!
+                </p>
+
+                <div class="reward-display">
+                    <div class="reward-label">Your Reward</div>
+                    <div class="reward-value" id="reward-text">25% OFF</div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-row">
+                        <span class="stat-label">⏱️ Time</span>
+                        <span class="stat-result" id="final-time">0:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">👆 Moves</span>
+                        <span class="stat-result" id="final-moves">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">⚡ Efficiency</span>
+                        <span class="stat-result" id="final-efficiency">100%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">⭐ Rating</span>
+                        <span class="stat-result" id="final-rating">Perfect!</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="playAgain()">
+                    Play Again
+                </button>
+                <button class="btn btn-secondary" onclick="claimReward()">
+                    Claim Reward
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // CONFIGURATION
+        // ===========================
+        const config = {
+            // Card content options (emojis, text, or images)
+            cardSets: {
+                fruits: ['🍎', '🍊', '🍇', '🍓', '🍒', '🥝', '🍑', '🥭', '🍍', '🥥'],
+                animals: ['🐶', '🐱', '🐭', '🐹', '🦊', '🐻', '🐼', '🦁', '🐸', '🐵'],
+                sports: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏓', '🏸', '🥊', '🎯'],
+                food: ['🍕', '🍔', '🌮', '🍿', '🍩', '🧁', '🍪', '🍦', '☕', '🥤']
+            },
+            
+            // Current card set (change to use different themes)
+            currentSet: 'fruits',
+            
+            // Difficulty settings
+            difficulties: {
+                easy: { cols: 3, rows: 4, pairs: 6 },
+                medium: { cols: 4, rows: 4, pairs: 8 },
+                hard: { cols: 4, rows: 5, pairs: 10 }
+            },
+            
+            // Rewards based on performance
+            rewards: [
+                { minEfficiency: 90, reward: '30% OFF', code: 'MASTER30' },
+                { minEfficiency: 75, reward: '25% OFF', code: 'GREAT25' },
+                { minEfficiency: 60, reward: '20% OFF', code: 'GOOD20' },
+                { minEfficiency: 0, reward: '15% OFF', code: 'PLAY15' }
+            ],
+            
+            // Analytics event names
+            analytics: {
+                gameOpened: 'memory_game_opened',
+                gameStarted: 'memory_game_started',
+                cardFlipped: 'memory_card_flipped',
+                matchFound: 'memory_match_found',
+                gameCompleted: 'memory_game_completed',
+                rewardClaimed: 'memory_reward_claimed',
+                gameClosed: 'memory_game_closed'
+            }
+        };
+
+        // ===========================
+        // GAME STATE
+        // ===========================
+        let gameState = {
+            cards: [],
+            flippedCards: [],
+            matchedPairs: 0,
+            totalPairs: 6,
+            moves: 0,
+            startTime: null,
+            timerInterval: null,
+            isProcessing: false,
+            difficulty: 'easy',
+            hasWon: false,
+            sessionId: Date.now()
+        };
+
+        // ===========================
+        // BRAZE INTEGRATION
+        // ===========================
+        
+        // Wait for Braze Bridge to be ready
+        window.addEventListener("ab.BridgeReady", function() {
+            console.log("Braze Bridge ready");
+            initializeGame();
+        }, false);
+
+        // Handle offline mode
+        if (typeof brazeBridge === 'undefined') {
+            document.addEventListener('DOMContentLoaded', initializeGame);
+        }
+
+        function initializeGame() {
+            // Track game open
+            trackEvent(config.analytics.gameOpened, {
+                session_id: gameState.sessionId,
+                timestamp: Date.now()
+            });
+        }
+
+        function trackEvent(eventName, properties = {}) {
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent(eventName, properties);
+            }
+            console.log('Event tracked:', eventName, properties);
+        }
+
+        function trackClick(buttonName) {
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick(buttonName);
+            }
+        }
+
+        function updateUserAttributes(attributes) {
+            if (typeof brazeBridge !== 'undefined') {
+                for (const [key, value] of Object.entries(attributes)) {
+                    brazeBridge.getUser().setCustomUserAttribute(key, value);
+                }
+                brazeBridge.requestImmediateDataFlush();
+            }
+        }
+
+        function closeGame() {
+            const sessionDuration = gameState.startTime ? 
+                Math.floor((Date.now() - gameState.startTime) / 1000) : 0;
+            
+            trackClick('close_button');
+            trackEvent(config.analytics.gameClosed, {
+                session_id: gameState.sessionId,
+                session_duration: sessionDuration,
+                had_win: gameState.hasWon
+            });
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.closeMessage();
+            }
+        }
+
+        // ===========================
+        // GAME LOGIC
+        // ===========================
+        
+        function selectDifficulty(level) {
+            gameState.difficulty = level;
+            
+            // Update UI
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.level === level);
+            });
+            
+            trackClick(`difficulty_${level}`);
+        }
+
+        function startGame() {
+            trackClick('start_game');
+            trackEvent(config.analytics.gameStarted, {
+                difficulty: gameState.difficulty,
+                card_theme: config.currentSet
+            });
+
+            // Reset game state
+            const difficulty = config.difficulties[gameState.difficulty];
+            gameState = {
+                ...gameState,
+                cards: [],
+                flippedCards: [],
+                matchedPairs: 0,
+                totalPairs: difficulty.pairs,
+                moves: 0,
+                startTime: Date.now(),
+                timerInterval: null,
+                isProcessing: false,
+                hasWon: false
+            };
+
+            // Create card pairs
+            const cardSet = config.cardSets[config.currentSet];
+            const selectedCards = cardSet.slice(0, difficulty.pairs);
+            const cardPairs = [...selectedCards, ...selectedCards];
+            gameState.cards = shuffleArray(cardPairs);
+
+            // Update UI
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            document.getElementById('pairs-display').textContent = `0/${difficulty.pairs}`;
+
+            // Set grid layout
+            const grid = document.getElementById('memory-grid');
+            grid.style.gridTemplateColumns = `repeat(${difficulty.cols}, 1fr)`;
+
+            // Initialize game
+            createBoard();
+            startTimer();
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function createBoard() {
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+
+            gameState.cards.forEach((content, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.index = index;
+                card.dataset.content = content;
+                card.setAttribute('role', 'gridcell');
+                card.setAttribute('aria-label', `Card ${index + 1}`);
+                card.setAttribute('tabindex', '0');
+                
+                card.innerHTML = `
+                    <div class="card-face card-front" aria-hidden="true">🎯</div>
+                    <div class="card-face card-back" aria-hidden="true">${content}</div>
+                `;
+
+                card.addEventListener('click', () => flipCard(card));
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        flipCard(card);
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (gameState.isProcessing || 
+                card.classList.contains('flipped') || 
+                card.classList.contains('matched')) {
+                return;
+            }
+
+            card.classList.add('flipped');
+            gameState.flippedCards.push(card);
+
+            trackClick(`card_${card.dataset.index}`);
+            trackEvent(config.analytics.cardFlipped, {
+                card_index: parseInt(card.dataset.index),
+                card_content: card.dataset.content,
+                flip_count: gameState.flippedCards.length
+            });
+
+            if (gameState.flippedCards.length === 2) {
+                gameState.isProcessing = true;
+                gameState.moves++;
+                updateMovesDisplay();
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = gameState.flippedCards;
+            const match = card1.dataset.content === card2.dataset.content;
+
+            setTimeout(() => {
+                if (match) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    gameState.matchedPairs++;
+                    
+                    updateProgress();
+                    
+                    trackEvent(config.analytics.matchFound, {
+                        moves_count: gameState.moves,
+                        matched_pairs: gameState.matchedPairs,
+                        content: card1.dataset.content
+                    });
+
+                    if (gameState.matchedPairs === gameState.totalPairs) {
+                        endGame();
+                    }
+                } else {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    
+                    // Shake animation for wrong match
+                    card1.style.animation = 'shake 0.5s';
+                    card2.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        card1.style.animation = '';
+                        card2.style.animation = '';
+                    }, 500);
+                }
+
+                gameState.flippedCards = [];
+                gameState.isProcessing = false;
+            }, 800);
+        }
+
+        function updateProgress() {
+            const progress = (gameState.matchedPairs / gameState.totalPairs) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('pairs-display').textContent = 
+                `${gameState.matchedPairs}/${gameState.totalPairs}`;
+        }
+
+        function startTimer() {
+            gameState.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer-display').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 100);
+        }
+
+        function updateMovesDisplay() {
+            document.getElementById('moves-display').textContent = gameState.moves;
+        }
+
+        function endGame() {
+            clearInterval(gameState.timerInterval);
+            gameState.hasWon = true;
+            
+            const duration = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const perfectMoves = gameState.totalPairs;
+            const efficiency = Math.max(0, Math.round((perfectMoves / gameState.moves) * 100));
+            
+            // Calculate reward
+            const reward = config.rewards.find(r => efficiency >= r.minEfficiency);
+            
+            // Calculate rating
+            let rating = 'Good!';
+            if (efficiency >= 90) rating = 'Perfect! ⭐⭐⭐';
+            else if (efficiency >= 75) rating = 'Excellent! ⭐⭐';
+            else if (efficiency >= 60) rating = 'Great! ⭐';
+
+            // Update completion screen
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            document.getElementById('final-time').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('final-moves').textContent = gameState.moves;
+            document.getElementById('final-efficiency').textContent = `${efficiency}%`;
+            document.getElementById('final-rating').textContent = rating;
+            document.getElementById('reward-text').textContent = reward.reward;
+
+            // Track completion
+            trackEvent(config.analytics.gameCompleted, {
+                difficulty: gameState.difficulty,
+                duration_seconds: duration,
+                total_moves: gameState.moves,
+                efficiency: efficiency,
+                reward_earned: reward.reward,
+                reward_code: reward.code
+            });
+
+            // Update user attributes
+            updateUserAttributes({
+                memory_games_completed: 1, // Will be incremented
+                last_memory_efficiency: efficiency,
+                last_memory_reward: reward.code
+            });
+
+            // Add celebration animation
+            setTimeout(() => {
+                document.getElementById('game-screen').classList.remove('active');
+                document.getElementById('completion-screen').classList.add('active');
+            }, 1000);
+        }
+
+        function playAgain() {
+            trackClick('play_again');
+            
+            document.getElementById('completion-screen').classList.remove('active');
+            document.getElementById('welcome-screen').classList.add('active');
+        }
+
+        function claimReward() {
+            trackClick('claim_reward');
+            
+            const reward = config.rewards.find(r => 
+                document.getElementById('reward-text').textContent === r.reward
+            );
+            
+            trackEvent(config.analytics.rewardClaimed, {
+                reward_type: reward.reward,
+                reward_code: reward.code,
+                session_duration: Math.floor((Date.now() - gameState.startTime) / 1000),
+                total_games: 1 // Will be incremented
+            });
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.requestImmediateDataFlush();
+                
+                // Show success message
+                const rewardDisplay = document.querySelector('.reward-display');
+                rewardDisplay.innerHTML = `
+                    <div class="reward-label">Reward Code</div>
+                    <div class="reward-value">${reward.code}</div>
+                    <div style="margin-top: 10px; color: var(--success-color); font-weight: 600;">
+                        ✓ Saved to your account!
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    brazeBridge.closeMessage();
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
