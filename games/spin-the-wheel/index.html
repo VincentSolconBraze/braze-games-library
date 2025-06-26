@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spin & Win - Interactive Prize Wheel</title>
     <style>
-        /* Variables CSS pour personnalisation facile */
+        /* CSS variables for easy customization */
         :root {
             --primary-color: #FF6B35;
             --secondary-color: #F7931E;
@@ -20,7 +20,7 @@
             --transition-speed: 0.3s;
         }
 
-        /* Reset et styles de base */
+        /* Reset and base styles */
         * {
             margin: 0;
             padding: 0;
@@ -39,7 +39,7 @@
             position: relative;
         }
 
-        /* Conteneur principal */
+        /* Main container */
         #game-container {
             background: var(--light-color);
             border-radius: var(--border-radius);
@@ -81,7 +81,7 @@
             opacity: 0.8;
         }
 
-        /* Bouton fermer */
+        /* Close button */
         #close-btn {
             position: absolute;
             top: 1rem;
@@ -106,7 +106,7 @@
             background: rgba(0, 0, 0, 0.1);
         }
 
-        /* Conteneur de la roue */
+        /* Wheel container */
         .wheel-container {
             position: relative;
             width: 300px;
@@ -114,7 +114,7 @@
             margin: 0 auto 2rem;
         }
 
-        /* SVG de la roue */
+        /* Wheel SVG */
         .wheel-svg {
             width: 100%;
             height: 100%;
@@ -122,7 +122,7 @@
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
         }
 
-        /* Texte des segments */
+        /* Segment text */
         .segment-text {
             font-size: 14px;
             font-weight: bold;
@@ -132,7 +132,7 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
-        /* Indicateur (flèche) */
+        /* Pointer (arrow) */
         .pointer {
             position: absolute;
             top: -30px;
@@ -156,7 +156,7 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Bouton de rotation */
+        /* Spin button */
         #spin-btn {
             display: block;
             width: 100%;
@@ -190,7 +190,7 @@
             cursor: not-allowed;
         }
 
-        /* Effet de brillance sur le bouton */
+        /* Shine effect on the button */
         #spin-btn::before {
             content: '';
             position: absolute;
@@ -206,7 +206,7 @@
             left: 100%;
         }
 
-        /* Modal de résultat */
+        /* Result modal */
         .result-modal {
             display: none;
             position: fixed;
@@ -312,7 +312,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        /* Confettis */
+        /* Confetti */
         .confetti {
             position: fixed;
             width: 10px;
@@ -329,7 +329,7 @@
             }
         }
 
-        /* Bordure de la roue */
+        /* Wheel border */
         .wheel-border {
             fill: none;
             stroke: #fff;
@@ -365,7 +365,7 @@
             }
         }
 
-        /* Accessibilité */
+        /* Accessibility */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation: none !important;
@@ -373,7 +373,7 @@
             }
         }
 
-        /* Focus styles pour accessibilité */
+        /* Focus styles for accessibility */
         button:focus,
         a:focus {
             outline: 3px solid var(--primary-color);
@@ -395,13 +395,9 @@
                 <div class="pointer-arrow"></div>
             </div>
             <svg class="wheel-svg" id="wheel" viewBox="0 0 300 300">
-                <!-- Les segments seront générés dynamiquement -->
                 <g id="wheel-group">
-                    <!-- Segments -->
-                </g>
-                <!-- Bordure extérieure -->
+                    </g>
                 <circle cx="150" cy="150" r="148" class="wheel-border"/>
-                <!-- Centre de la roue -->
                 <circle cx="150" cy="150" r="30" fill="#fff" stroke="#ddd" stroke-width="2"/>
                 <circle cx="150" cy="150" r="15" fill="#FF6B35"/>
             </svg>
@@ -412,7 +408,6 @@
         </button>
     </div>
 
-    <!-- Modal de résultat -->
     <div class="result-modal" id="resultModal" role="dialog" aria-labelledby="result-title" aria-hidden="true">
         <div class="result-content">
             <div class="result-emoji" id="resultEmoji">🎉</div>
@@ -427,7 +422,7 @@
     </div>
 
     <script>
-        // Configuration des récompenses avec couleurs
+        // Rewards configuration with colors
         const rewards = [
             { text: "20% OFF", emoji: "🎯", code: "SAVE20", message: "Save 20% on your next purchase!", color: "#FF6B35" },
             { text: "FREE SHIP", emoji: "📦", code: "FREESHIP", message: "Enjoy free shipping on any order!", color: "#F7931E" },
@@ -444,7 +439,7 @@
         let spinCount = 0;
         let gameStartTime;
 
-        // Fonction pour créer les segments SVG
+        // Function to create SVG segments
         function createWheel() {
             const wheelGroup = document.getElementById('wheel-group');
             const totalSegments = rewards.length;
@@ -454,20 +449,20 @@
             const centerY = 150;
 
             rewards.forEach((reward, index) => {
-                const startAngle = index * anglePerSegment - 90; // -90 pour commencer en haut
+                const startAngle = index * anglePerSegment - 90; // -90 to start at the top
                 const endAngle = startAngle + anglePerSegment;
                 
-                // Convertir en radians
+                // Convert to radians
                 const startAngleRad = (startAngle * Math.PI) / 180;
                 const endAngleRad = (endAngle * Math.PI) / 180;
                 
-                // Calculer les points du segment
+                // Calculate segment points
                 const x1 = centerX + radius * Math.cos(startAngleRad);
                 const y1 = centerY + radius * Math.sin(startAngleRad);
                 const x2 = centerX + radius * Math.cos(endAngleRad);
                 const y2 = centerY + radius * Math.sin(endAngleRad);
                 
-                // Créer le path du segment
+                // Create the segment path
                 const largeArcFlag = anglePerSegment > 180 ? 1 : 0;
                 const pathData = [
                     `M ${centerX} ${centerY}`,
@@ -476,28 +471,28 @@
                     'Z'
                 ].join(' ');
                 
-                // Créer le segment
+                // Create the segment
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.setAttribute('d', pathData);
                 path.setAttribute('fill', reward.color);
                 path.setAttribute('stroke', '#fff');
                 path.setAttribute('stroke-width', '2');
                 
-                // Calculer la position du texte (au milieu du segment)
+                // Calculate the text position (in the middle of the segment)
                 const textAngle = startAngle + anglePerSegment / 2;
                 const textAngleRad = (textAngle * Math.PI) / 180;
                 const textRadius = radius * 0.7;
                 const textX = centerX + textRadius * Math.cos(textAngleRad);
                 const textY = centerY + textRadius * Math.sin(textAngleRad);
                 
-                // Créer le texte
+                // Create the text
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', textX);
                 text.setAttribute('y', textY);
                 text.setAttribute('class', 'segment-text');
                 text.setAttribute('transform', `rotate(${textAngle + 90}, ${textX}, ${textY})`);
                 
-                // Ajuster la couleur du texte pour le segment jaune
+                // Adjust text color for the yellow segment
                 if (reward.color === '#FCEE21') {
                     text.style.fill = '#333';
                 }
@@ -509,7 +504,7 @@
             });
         }
 
-        // Initialisation du jeu
+        // Game initialization
         window.addEventListener("ab.BridgeReady", function() {
             initializeGame();
         }, false);
@@ -518,7 +513,7 @@
             gameStartTime = Date.now();
             createWheel();
             
-            // Log de l'ouverture du jeu
+            // Log game opening
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logCustomEvent("spin_wheel_game_opened", {
                     timestamp: Date.now()
@@ -532,7 +527,7 @@
             const spinBtn = document.getElementById('spin-btn');
             const wheel = document.getElementById('wheel');
             
-            // Track le clic sur le bouton spin
+            // Track the click on the spin button
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logClick("spin_button");
                 brazeBridge.logCustomEvent("wheel_spin_started", {
@@ -544,23 +539,23 @@
             spinBtn.disabled = true;
             spinBtn.textContent = "SPINNING...";
             
-            // Déterminer le segment gagnant (aléatoire)
+            // Determine the winning segment (random)
             const totalSegments = rewards.length;
             const anglePerSegment = 360 / totalSegments;
             const winningIndex = Math.floor(Math.random() * totalSegments);
             
-            // Calculer l'angle pour que le segment gagnant soit en haut
+            // Calculate the angle for the winning segment to be at the top
             const winningAngle = winningIndex * anglePerSegment;
             
-            // Calculer la rotation finale (plusieurs tours + position finale)
-            const spins = 5 + Math.random() * 5; // 5-10 tours
+            // Calculate the final rotation (multiple spins + final position)
+            const spins = 5 + Math.random() * 5; // 5-10 spins
             const finalRotation = currentRotation + (spins * 360) + (360 - winningAngle);
             
-            // Appliquer la rotation
+            // Apply the rotation
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             currentRotation = finalRotation;
 
-            // Afficher le résultat après l'animation
+            // Display the result after the animation
             setTimeout(() => {
                 showResult(rewards[winningIndex]);
                 isSpinning = false;
@@ -568,7 +563,7 @@
                 spinBtn.textContent = "SPIN AGAIN!";
                 spinCount++;
                 
-                // Track la fin du spin
+                // Track the end of the spin
                 if (typeof brazeBridge !== 'undefined') {
                     brazeBridge.logCustomEvent("wheel_spin_completed", {
                         reward_won: rewards[winningIndex].text,
@@ -579,7 +574,7 @@
                 }
             }, 4000);
 
-            // Créer des confettis
+            // Create confetti
             createConfetti();
         }
 
@@ -596,7 +591,7 @@
             modal.style.display = 'block';
             modal.setAttribute('aria-hidden', 'false');
             
-            // Log de l'affichage du résultat
+            // Log the result display
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logCustomEvent("reward_displayed", {
                     reward_type: reward.text,
@@ -608,7 +603,7 @@
         function claimReward() {
             const code = document.getElementById('resultCode').textContent;
             
-            // Track le claim de la récompense
+            // Track the reward claim
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logClick("claim_reward");
                 brazeBridge.logCustomEvent("reward_claimed", {
@@ -617,20 +612,20 @@
                     game_duration: Date.now() - gameStartTime
                 });
                 
-                // Mettre à jour l'attribut utilisateur
+                // Update user attribute
                 brazeBridge.getUser().setCustomUserAttribute("last_spin_reward", code);
                 brazeBridge.getUser().setCustomUserAttribute("total_spins", spinCount);
                 brazeBridge.requestImmediateDataFlush();
             }
             
-            // Copier le code dans le presse-papier si possible
+            // Copy the code to the clipboard if possible
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).then(() => {
                     alert(`Code ${code} copied to clipboard!`);
                 });
             }
             
-            // Fermer le jeu après le claim
+            // Close the game after claiming
             setTimeout(() => {
                 closeGame();
             }, 1000);
@@ -641,7 +636,7 @@
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
             
-            // Track le replay
+            // Track the replay
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logClick("play_again");
                 brazeBridge.logCustomEvent("play_again_clicked", {
@@ -651,7 +646,7 @@
         }
 
         function closeGame() {
-            // Track la fermeture
+            // Track the closing
             if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.logClick();
                 brazeBridge.logCustomEvent("game_closed", {
@@ -682,7 +677,7 @@
             }
         }
 
-        // Gestion du clavier pour l'accessibilité
+        // Keyboard management for accessibility
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modal = document.getElementById('resultModal');
@@ -697,11 +692,11 @@
             }
         });
 
-        // Initialisation si brazeBridge est déjà prêt
+        // Initialization if brazeBridge is already ready
         if (typeof brazeBridge !== 'undefined') {
             initializeGame();
         } else {
-            // Si brazeBridge n'est pas disponible, initialiser quand même pour les tests
+            // If brazeBridge is not available, initialize anyway for testing
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof brazeBridge === 'undefined') {
                     initializeGame();
