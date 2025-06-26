@@ -2,7 +2,7 @@
 
 > An exciting slot machine game with smooth reel animations and instant rewards, optimized for Braze in-app messages.
 
-![Preview](./preview.png)
+![Preview](https://cdn.braze.eu/appboy/communication/assets/image_assets/images/685cf4bcd4422900659cbf91/original.png?1750922428)
 
 ## ✨ Features
 

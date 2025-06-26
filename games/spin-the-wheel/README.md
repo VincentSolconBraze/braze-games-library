@@ -2,7 +2,7 @@
 
 > An interactive fortune wheel game with customizable prizes and instant rewards, optimized for Braze in-app messages.
 
-![Preview](./preview.png)
+![Preview](https://cdn.braze.eu/appboy/communication/assets/image_assets/images/685cf591b1c74f0065bcdb09/original.png?1750922641)
 
 ## ✨ Features
 
