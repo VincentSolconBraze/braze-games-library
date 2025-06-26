@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Slots - Spin to Win!</title>
+    <style>
+        /* Customizable theme variables */
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FF6B6B;
+            --accent-color: #4ECDC4;
+            --dark-color: #1A1A2E;
+            --light-color: #FFFFFF;
+            --reel-bg: #0F0F1E;
+            --win-color: #00FF00;
+            --lose-color: #FF6B6B;
+            --font-family: 'Arial', sans-serif;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--dark-color) 0%, #0F0F1E 100%);
+            color: var(--light-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Main container */
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Close button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light-color);
+            font-size: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            z-index: 100;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Title section */
+        .game-header {
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            font-size: 1.1em;
+            color: var(--accent-color);
+            opacity: 0.9;
+        }
+
+        /* Slot machine container */
+        .slot-machine {
+            background: var(--reel-bg);
+            border: 3px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.3),
+                inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative lights */
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                rgba(255, 215, 0, 0.1) 49%,
+                rgba(255, 215, 0, 0.1) 51%,
+                transparent 55%
+            );
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* Reels container */
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Individual reel */
+        .reel {
+            width: 90px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Reel window effect */
+        .reel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.3) 0%,
+                transparent 20%,
+                transparent 80%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+            pointer-events: none;
+        }
+
+        /* Reel strip */
+        .reel-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transition: none;
+        }
+
+        /* Spinning animation */
+        .reel-strip.spinning {
+            animation: spin 0.1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-120px); }
+        }
+
+        /* Symbol */
+        .symbol {
+            width: 90px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Win line */
+        .win-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--win-color);
+            transform: translateY(-50%);
+            opacity: 0;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 20px var(--win-color);
+        }
+
+        .win-line.active {
+            opacity: 1;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateY(-50%) scaleY(1); }
+            50% { transform: translateY(-50%) scaleY(1.5); }
+        }
+
+        /* Spin button */
+        .spin-btn {
+            background: linear-gradient(45deg, var(--primary-color), #FFA500);
+            color: var(--dark-color);
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 
+                0 4px 15px rgba(255, 215, 0, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 20px rgba(255, 215, 0, 0.5),
+                0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .spin-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Button ripple effect */
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .spin-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Result section */
+        .result-section {
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .result-text {
+            font-size: 1.3em;
+            margin: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .result-text.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-text.win {
+            color: var(--win-color);
+            font-size: 1.6em;
+            text-shadow: 0 0 20px var(--win-color);
+            animation: winPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .result-text.lose {
+            color: var(--lose-color);
+        }
+
+        /* Reward display */
+        .reward-display {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 15px 30px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .reward-display.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .reward-code {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .action-buttons.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            text-transform: uppercase;
+        }
+
+        .claim-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .claim-btn:hover {
+            background: #3DBDB6;
+            transform: scale(1.05);
+        }
+
+        .play-again-btn {
+            background: transparent;
+            color: var(--light-color);
+            border: 2px solid var(--light-color);
+        }
+
+        .play-again-btn:hover {
+            background: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2em;
+            }
+            
+            .reel {
+                width: 75px;
+                height: 100px;
+            }
+            
+            .symbol {
+                width: 75px;
+                height: 100px;
+                font-size: 3em;
+            }
+            
+            .spin-btn {
+                padding: 15px 40px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles */
+        button:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Loading state */
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" role="main" aria-label="Slot Machine Game">
+        <button class="close-btn" aria-label="Close game" onclick="closeGame()">×</button>
+        
+        <div class="game-header">
+            <h1 class="game-title">Lucky Slots</h1>
+            <p class="game-subtitle">Spin to win amazing rewards!</p>
+        </div>
+        
+        <div class="slot-machine">
+            <div class="reels-container" role="region" aria-label="Slot machine reels">
+                <div class="reel" aria-label="Reel 1">
+                    <div class="reel-strip" id="reel1">
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">⭐</div>
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍋</div>
+                    </div>
+                </div>
+                <div class="reel" aria-label="Reel 2">
+                    <div class="reel-strip" id="reel2">
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">⭐</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍇</div>
+                    </div>
+                </div>
+                <div class="reel" aria-label="Reel 3">
+                    <div class="reel-strip" id="reel3">
+                        <div class="symbol">💎</div>
+                        <div class="symbol">⭐</div>
+                        <div class="symbol">🍒</div>
+                        <div class="symbol">🍊</div>
+                        <div class="symbol">🍋</div>
+                        <div class="symbol">🍇</div>
+                        <div class="symbol">💎</div>
+                        <div class="symbol">⭐</div>
+                    </div>
+                </div>
+                <div class="win-line" id="winLine"></div>
+            </div>
+        </div>
+        
+        <button class="spin-btn" id="spinBtn" onclick="startSpin()" aria-label="Spin the reels">
+            SPIN TO WIN!
+        </button>
+        
+        <div class="result-section" role="status" aria-live="polite">
+            <p class="result-text" id="resultText"></p>
+            <div class="reward-display" id="rewardDisplay">
+                <div class="reward-code" id="rewardCode"></div>
+            </div>
+            <div class="action-buttons" id="actionButtons">
+                <button class="btn claim-btn" onclick="claimReward()">Claim Reward</button>
+                <button class="btn play-again-btn" onclick="resetGame()">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="sr-only" role="status" aria-live="assertive" id="screenReaderStatus"></div>
+    </div>
+
+    <script>
+        // Game configuration
+        const config = {
+            symbols: ['🍒', '🍋', '🍊', '🍇', '💎', '⭐'],
+            rewards: [
+                { 
+                    symbol: '🍒',
+                    name: 'Cherry',
+                    reward: '10% OFF',
+                    code: 'CHERRY10',
+                    message: 'Sweet! You won 10% off your next purchase!'
+                },
+                { 
+                    symbol: '🍋',
+                    name: 'Lemon',
+                    reward: '15% OFF',
+                    code: 'LEMON15',
+                    message: 'Zesty! Enjoy 15% off your order!'
+                },
+                { 
+                    symbol: '🍊',
+                    name: 'Orange',
+                    reward: '20% OFF',
+                    code: 'ORANGE20',
+                    message: 'Juicy! Get 20% off everything!'
+                },
+                { 
+                    symbol: '🍇',
+                    name: 'Grape',
+                    reward: 'FREE SHIPPING',
+                    code: 'SHIPFREE',
+                    message: 'Grape news! Free shipping on any order!'
+                },
+                { 
+                    symbol: '💎',
+                    name: 'Diamond',
+                    reward: '$25 OFF',
+                    code: 'DIAMOND25',
+                    message: 'Brilliant! Save $25 on orders over $100!'
+                },
+                { 
+                    symbol: '⭐',
+                    name: 'Star',
+                    reward: 'GRAND PRIZE',
+                    code: 'STAR50',
+                    message: 'JACKPOT! 50% off your entire order!'
+                }
+            ],
+            spinDuration: 2000,
+            reelDelay: 300,
+            maxSpinsPerSession: 3
+        };
+
+        // Game state
+        let isSpinning = false;
+        let spinCount = 0;
+        let gameStartTime = Date.now();
+        let currentReward = null;
+        let slotResults = [];
+
+        // DOM elements
+        const spinBtn = document.getElementById('spinBtn');
+        const resultText = document.getElementById('resultText');
+        const rewardDisplay = document.getElementById('rewardDisplay');
+        const rewardCode = document.getElementById('rewardCode');
+        const actionButtons = document.getElementById('actionButtons');
+        const winLine = document.getElementById('winLine');
+
+        // Initialize when Braze bridge is ready
+        window.addEventListener("ab.BridgeReady", function() {
+            initializeGame();
+        }, false);
+
+        // Handle offline mode
+        if (typeof brazeBridge === 'undefined') {
+            document.addEventListener('DOMContentLoaded', initializeGame);
+        }
+
+        function initializeGame() {
+            // Log game opened
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_machine_opened", {
+                    timestamp: Date.now()
+                });
+            }
+
+            // Reset reels to initial position
+            resetReels();
+            
+            // Update button text based on remaining spins
+            updateSpinButton();
+        }
+
+        function resetReels() {
+            document.getElementById('reel1').style.transform = 'translateY(0)';
+            document.getElementById('reel2').style.transform = 'translateY(0)';
+            document.getElementById('reel3').style.transform = 'translateY(0)';
+            document.getElementById('reel1').style.transition = 'none';
+            document.getElementById('reel2').style.transition = 'none';
+            document.getElementById('reel3').style.transition = 'none';
+        }
+
+        function updateSpinButton() {
+            const remainingSpins = config.maxSpinsPerSession - spinCount;
+            if (remainingSpins > 0) {
+                spinBtn.textContent = `SPIN TO WIN! (${remainingSpins} left)`;
+                spinBtn.disabled = false;
+            } else {
+                spinBtn.textContent = 'No more spins!';
+                spinBtn.disabled = true;
+            }
+        }
+
+        function startSpin() {
+            if (isSpinning || spinCount >= config.maxSpinsPerSession) return;
+
+            // Track spin button click
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("spin_button");
+            }
+            
+            isSpinning = true;
+            spinCount++;
+            currentReward = null;
+            slotResults = [];
+
+            // Update UI for spinning state
+            spinBtn.disabled = true;
+            resultText.classList.remove('show', 'win', 'lose');
+            rewardDisplay.classList.remove('show');
+            actionButtons.classList.remove('show');
+            winLine.classList.remove('active');
+
+            // Update screen reader
+            updateScreenReader('Spinning the reels...');
+
+            // Track spin started
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_spin_started", {
+                    spin_count: spinCount,
+                    timestamp: Date.now()
+                });
+            }
+
+            // Add transitions back
+            setTimeout(() => {
+                document.getElementById('reel1').style.transition = 'transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                document.getElementById('reel2').style.transition = 'transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+                document.getElementById('reel3').style.transition = 'transform 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+            }, 50);
+
+            // Start spinning animation
+            ['reel1', 'reel2', 'reel3'].forEach(reelId => {
+                document.getElementById(reelId).classList.add('spinning');
+            });
+
+            // Stop reels sequentially
+            setTimeout(() => stopReel('reel1', 0), config.spinDuration);
+            setTimeout(() => stopReel('reel2', 1), config.spinDuration + config.reelDelay);
+            setTimeout(() => stopReel('reel3', 2), config.spinDuration + (config.reelDelay * 2));
+
+            // Check results after all reels stop
+            setTimeout(() => {
+                checkWinCondition();
+                isSpinning = false;
+                updateSpinButton();
+            }, config.spinDuration + (config.reelDelay * 3));
+        }
+
+        function stopReel(reelId, reelIndex) {
+            const reel = document.getElementById(reelId);
+            reel.classList.remove('spinning');
+
+            // Generate random stop position
+            const symbolIndex = Math.floor(Math.random() * 6);
+            const stopPosition = -(symbolIndex * 120);
+            reel.style.transform = `translateY(${stopPosition}px)`;
+
+            // Store the result
+            slotResults[reelIndex] = config.symbols[symbolIndex];
+        }
+
+        function checkWinCondition() {
+            const isWin = slotResults[0] === slotResults[1] && slotResults[1] === slotResults[2];
+            const combination = slotResults.join('');
+
+            if (isWin) {
+                handleWin(slotResults[0], combination);
+            } else {
+                handleLoss(combination);
+            }
+
+            // Track spin completed
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_spin_completed", {
+                    spin_count: spinCount,
+                    combination: combination,
+                    is_win: isWin,
+                    timestamp: Date.now()
+                });
+                brazeBridge.requestImmediateDataFlush();
+            }
+        }
+
+        function handleWin(symbol, combination) {
+            const rewardData = config.rewards.find(r => r.symbol === symbol);
+            currentReward = rewardData;
+
+            // Show win effects
+            winLine.classList.add('active');
+            resultText.textContent = rewardData.message;
+            resultText.classList.add('show', 'win');
+            
+            // Show reward display
+            rewardCode.textContent = rewardData.code;
+            rewardDisplay.classList.add('show');
+            
+            // Show action buttons
+            actionButtons.classList.add('show');
+
+            // Create confetti
+            createConfetti();
+
+            // Update screen reader
+            updateScreenReader(`Congratulations! ${rewardData.message}`);
+
+            // Track win event
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_machine_win", {
+                    spin_count: spinCount,
+                    winning_symbol: rewardData.name,
+                    reward_type: rewardData.reward,
+                    reward_code: rewardData.code,
+                    combination: combination,
+                    timestamp: Date.now()
+                });
+
+                // Update user attribute
+                brazeBridge.getUser().setCustomUserAttribute("last_slot_reward", rewardData.code);
+            }
+        }
+
+        function handleLoss(combination) {
+            // Show loss message
+            const messages = [
+                'So close! Try again!',
+                'Almost there! One more spin?',
+                'Keep spinning for your chance to win!',
+                'Not this time, but luck is coming!'
+            ];
+            
+            resultText.textContent = messages[Math.floor(Math.random() * messages.length)];
+            resultText.classList.add('show', 'lose');
+
+            // Update screen reader
+            updateScreenReader('No match this time. Try again!');
+
+            // Track loss event
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_machine_loss", {
+                    spin_count: spinCount,
+                    combination: combination,
+                    timestamp: Date.now()
+                });
+            }
+
+            // Show play again if spins remaining
+            if (spinCount < config.maxSpinsPerSession) {
+                setTimeout(() => {
+                    actionButtons.classList.add('show');
+                }, 1000);
+            }
+        }
+
+        function claimReward() {
+            if (!currentReward) return;
+
+            // Track claim
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("claim_reward");
+                brazeBridge.logCustomEvent("slot_reward_claimed", {
+                    reward_type: currentReward.reward,
+                    reward_code: currentReward.code,
+                    total_spins: spinCount,
+                    session_duration: Date.now() - gameStartTime,
+                    timestamp: Date.now()
+                });
+
+                // Update user attributes
+                brazeBridge.getUser().incrementCustomUserAttribute("slot_rewards_claimed", 1);
+                brazeBridge.requestImmediateDataFlush();
+            }
+
+            // Show success message
+            resultText.textContent = '✅ Reward claimed! Check your email!';
+            actionButtons.classList.remove('show');
+
+            // Close after delay
+            setTimeout(() => {
+                if (typeof brazeBridge !== 'undefined') {
+                    brazeBridge.closeMessage();
+                }
+            }, 2000);
+        }
+
+        function resetGame() {
+            // Hide results
+            resultText.classList.remove('show', 'win', 'lose');
+            rewardDisplay.classList.remove('show');
+            actionButtons.classList.remove('show');
+            winLine.classList.remove('active');
+
+            // Reset reels
+            resetReels();
+
+            // Track play again
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("play_again");
+                brazeBridge.logCustomEvent("slot_play_again_clicked", {
+                    after_spin_count: spinCount,
+                    timestamp: Date.now()
+                });
+            }
+
+            // Update button
+            updateSpinButton();
+        }
+
+        function closeGame() {
+            // Track close
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("close_button");
+                brazeBridge.logCustomEvent("slot_machine_closed", {
+                    total_spins: spinCount,
+                    session_duration: Date.now() - gameStartTime,
+                    had_win: currentReward !== null,
+                    last_action: isSpinning ? 'spinning' : 'idle',
+                    timestamp: Date.now()
+                });
+
+                // Update total spins
+                brazeBridge.getUser().incrementCustomUserAttribute("total_slot_spins", spinCount);
+                brazeBridge.requestImmediateDataFlush();
+                
+                brazeBridge.closeMessage();
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500'];
+            const container = document.getElementById('game-container');
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    container.appendChild(confetti);
+
+                    // Remove after animation
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+
+        function updateScreenReader(message) {
+            const srStatus = document.getElementById('screenReaderStatus');
+            srStatus.textContent = message;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGame();
+            } else if ((e.key === 'Enter' || e.key === ' ') && document.activeElement === spinBtn) {
+                e.preventDefault();
+                startSpin();
+            }
+        });
+
+        // Track when user leaves tab
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("slot_machine_backgrounded", {
+                    total_spins: spinCount,
+                    timestamp: Date.now()
+                });
+            }
+        });
+    </script>
+</body>
+</html>
