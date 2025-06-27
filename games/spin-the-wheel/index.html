@@ -3,63 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin & Win - Interactive Prize Wheel</title>
+    <title>Spin the Wheel - Braze Interactive Game</title>
     <style>
-        /* CSS variables for easy customization */
+        /* OBLIGATOIRE : Variables CSS Braze-compatibles */
         :root {
-            --primary-color: #FF6B35;
-            --secondary-color: #F7931E;
-            --accent-color: #FCEE21;
-            --dark-color: #2C3E50;
-            --light-color: #FFFFFF;
-            --success-color: #27AE60;
-            --text-color: #333333;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            --border-radius: 12px;
+            /* Braze Brand Colors (NON MODIFIABLE) */
+            --braze-orange: #FFA524;
+            --braze-pink: #FFA4FB;
+            --braze-purple: #801ED7;
+            
+            /* Customizable Game Colors */
+            --game-primary: var(--braze-orange);
+            --game-secondary: var(--braze-pink);
+            --game-accent: var(--braze-purple);
+            --game-background: #FFFFFF;
+            --game-text: #333333;
+            
+            /* Performance Variables */
             --transition-speed: 0.3s;
+            --border-radius: 12px;
+            --shadow-depth: 0 4px 20px rgba(0,0,0,0.1);
+            
+            /* Game-specific colors */
+            --success-color: #27AE60;
+            --wheel-border: #FFFFFF;
+            --confetti-colors: #FF6B35, #F7931E, #FCEE21, #8BC34A, #00BCD4, #9C27B0;
         }
-
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        
+        /* OBLIGATOIRE : Base responsive */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
         }
-
-        body {
-            font-family: var(--font-family);
-            color: var(--text-color);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            overflow: hidden;
+            background: var(--game-background);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
             position: relative;
         }
-
-        /* Main container */
+        
         #game-container {
-            background: var(--light-color);
-            border-radius: var(--border-radius);
-            box-shadow: 0 20px 60px var(--shadow-color);
-            padding: 2rem;
+            width: 100vw;
+            height: 100vh;
             max-width: 500px;
-            width: 90%;
+            max-height: 800px;
+            margin: 0 auto;
             position: relative;
-            animation: slideIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
         }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        
+        /* Inner content wrapper */
+        .game-content {
+            background: var(--game-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-depth);
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* OBLIGATOIRE : Close button standardisé */
+        #close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            border: 2px solid var(--game-primary);
+            color: var(--game-primary);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #close-btn:hover { 
+            transform: scale(1.1); 
+        }
+        
+        /* OBLIGATOIRE : Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        button:focus, 
+        [tabindex]:focus {
+            outline: 3px solid var(--game-primary);
+            outline-offset: 2px;
         }
 
         /* Header */
@@ -70,40 +124,15 @@
 
         .header h1 {
             font-size: 2rem;
-            color: var(--primary-color);
+            color: var(--game-primary);
             margin-bottom: 0.5rem;
             font-weight: bold;
         }
 
         .header p {
-            color: var(--dark-color);
+            color: var(--game-text);
             font-size: 1.1rem;
             opacity: 0.8;
-        }
-
-        /* Close button */
-        #close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--dark-color);
-            opacity: 0.6;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-speed);
-        }
-
-        #close-btn:hover {
-            opacity: 1;
-            background: rgba(0, 0, 0, 0.1);
         }
 
         /* Wheel container */
@@ -146,7 +175,7 @@
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 40px solid var(--primary-color);
+            border-top: 40px solid var(--game-primary);
             filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
             animation: bounce 2s infinite;
         }
@@ -165,12 +194,12 @@
             padding: 1rem 2rem;
             font-size: 1.2rem;
             font-weight: bold;
-            color: var(--light-color);
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--game-background);
+            background: linear-gradient(135deg, var(--game-primary), var(--game-secondary));
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+            box-shadow: 0 5px 20px rgba(255, 165, 36, 0.4);
             transition: all var(--transition-speed);
             position: relative;
             overflow: hidden;
@@ -178,7 +207,7 @@
 
         #spin-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 7px 25px rgba(255, 107, 53, 0.5);
+            box-shadow: 0 7px 25px rgba(255, 165, 36, 0.5);
         }
 
         #spin-btn:active:not(:disabled) {
@@ -229,7 +258,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--light-color);
+            background: var(--game-background);
             padding: 3rem;
             border-radius: var(--border-radius);
             text-align: center;
@@ -256,28 +285,43 @@
 
         .result-title {
             font-size: 1.8rem;
-            color: var(--primary-color);
+            color: var(--game-primary);
             margin-bottom: 1rem;
         }
 
         .result-message {
             font-size: 1.2rem;
-            color: var(--dark-color);
+            color: var(--game-text);
             margin-bottom: 2rem;
             line-height: 1.6;
         }
 
         .result-code {
             background: #f8f9fa;
-            border: 2px dashed var(--primary-color);
+            border: 2px dashed var(--game-primary);
             padding: 1rem;
             font-size: 1.5rem;
             font-weight: bold;
             letter-spacing: 2px;
-            color: var(--primary-color);
+            color: var(--game-primary);
             margin-bottom: 2rem;
             border-radius: 8px;
         }
+
+        .result-tier {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .tier-bronze { background: #CD7F32; color: white; }
+        .tier-silver { background: #C0C0C0; color: #333; }
+        .tier-gold { background: #FFD700; color: #333; }
+        .tier-platinum { background: #E5E4E2; color: #333; }
 
         .result-buttons {
             display: flex;
@@ -297,14 +341,14 @@
         }
 
         .result-btn-primary {
-            background: var(--primary-color);
-            color: var(--light-color);
+            background: var(--game-primary);
+            color: var(--game-background);
         }
 
         .result-btn-secondary {
             background: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
+            color: var(--game-primary);
+            border: 2px solid var(--game-primary);
         }
 
         .result-btn:hover {
@@ -317,7 +361,7 @@
             position: fixed;
             width: 10px;
             height: 10px;
-            background: var(--accent-color);
+            background: var(--game-accent);
             position: absolute;
             animation: confetti-fall 3s linear;
         }
@@ -332,13 +376,17 @@
         /* Wheel border */
         .wheel-border {
             fill: none;
-            stroke: #fff;
+            stroke: var(--wheel-border);
             stroke-width: 4;
         }
 
         /* Responsive */
         @media (max-width: 480px) {
             #game-container {
+                padding: 1rem;
+            }
+
+            .game-content {
                 padding: 1.5rem;
             }
 
@@ -372,45 +420,43 @@
                 transition: none !important;
             }
         }
-
-        /* Focus styles for accessibility */
-        button:focus,
-        a:focus {
-            outline: 3px solid var(--primary-color);
-            outline-offset: 2px;
-        }
     </style>
 </head>
 <body>
-    <div id="game-container" role="main" aria-label="Spin the Wheel Game">
-        <button id="close-btn" aria-label="Close game" onclick="closeGame()">✕</button>
-        
-        <div class="header">
-            <h1>Spin & Win!</h1>
-            <p>Try your luck and win amazing prizes!</p>
-        </div>
-
-        <div class="wheel-container">
-            <div class="pointer">
-                <div class="pointer-arrow"></div>
+    <div id="game-container" role="main" aria-label="Spin the Wheel Interactive Game">
+        <div class="game-content">
+            <button id="close-btn" aria-label="Close game" onclick="closeGame()">×</button>
+            
+            <div class="header">
+                <h1>Spin & Win!</h1>
+                <p>Try your luck and win amazing prizes!</p>
             </div>
-            <svg class="wheel-svg" id="wheel" viewBox="0 0 300 300">
-                <g id="wheel-group">
-                    </g>
-                <circle cx="150" cy="150" r="148" class="wheel-border"/>
-                <circle cx="150" cy="150" r="30" fill="#fff" stroke="#ddd" stroke-width="2"/>
-                <circle cx="150" cy="150" r="15" fill="#FF6B35"/>
-            </svg>
-        </div>
 
-        <button id="spin-btn" onclick="spinWheel()" aria-label="Spin the wheel to win a prize">
-            SPIN TO WIN!
-        </button>
+            <div class="wheel-container">
+                <div class="pointer">
+                    <div class="pointer-arrow"></div>
+                </div>
+                <svg class="wheel-svg" id="wheel" viewBox="0 0 300 300">
+                    <g id="wheel-group">
+                    </g>
+                    <circle cx="150" cy="150" r="148" class="wheel-border"/>
+                    <circle cx="150" cy="150" r="30" fill="#fff" stroke="#ddd" stroke-width="2"/>
+                    <circle cx="150" cy="150" r="15" fill="var(--game-primary)"/>
+                </svg>
+            </div>
+
+            <button id="spin-btn" onclick="spinWheel()" aria-label="Spin the wheel to win a prize">
+                SPIN TO WIN!
+            </button>
+        </div>
+        
+        <div class="sr-only" role="status" aria-live="polite" id="sr-status"></div>
     </div>
 
     <div class="result-modal" id="resultModal" role="dialog" aria-labelledby="result-title" aria-hidden="true">
         <div class="result-content">
             <div class="result-emoji" id="resultEmoji">🎉</div>
+            <span class="result-tier" id="resultTier">GOLD</span>
             <h2 class="result-title" id="result-title">Congratulations!</h2>
             <p class="result-message" id="resultMessage">You've won an amazing prize!</p>
             <div class="result-code" id="resultCode">CODE2024</div>
@@ -422,24 +468,206 @@
     </div>
 
     <script>
+        // OBLIGATOIRE : Configuration du jeu
+        const GAME_CONFIG = {
+            type: "spin_wheel",
+            version: "1.0.0",
+            braze_category: "reward",
+            session_id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            max_session_duration: 120,
+            target_completion_time: 60
+        };
+        
+        // OBLIGATOIRE : Gestionnaire d'events Braze standardisé
+        class BrazeGameTracker {
+            constructor(gameConfig) {
+                this.config = gameConfig;
+                this.startTime = Date.now();
+                this.actionCount = 0;
+            }
+            
+            trackEvent(eventType, additionalProps = {}) {
+                const baseProps = {
+                    game: {
+                        type: this.config.type,
+                        session_id: this.config.session_id,
+                        version: this.config.version
+                    },
+                    context: {
+                        timestamp: Date.now(),
+                        session_duration: Math.floor((Date.now() - this.startTime) / 1000),
+                        device_type: window.innerWidth <= 768 ? 'mobile' : 'desktop',
+                        is_replay: this.actionCount > 0
+                    },
+                    ...additionalProps
+                };
+                
+                if (typeof brazeBridge !== 'undefined') {
+                    brazeBridge.logCustomEvent(eventType, baseProps);
+                    brazeBridge.requestImmediateDataFlush();
+                }
+                
+                console.log(`Event: ${eventType}`, baseProps);
+            }
+            
+            trackClick(buttonId, context = {}) {
+                this.actionCount++;
+                if (typeof brazeBridge !== 'undefined') {
+                    brazeBridge.logClick(buttonId);
+                }
+                this.trackEvent('game_action', {
+                    action: { 
+                        type: 'click', 
+                        button_id: buttonId, 
+                        action_count: this.actionCount 
+                    },
+                    ...context
+                });
+            }
+            
+            updateUserAttributes(attributes) {
+                if (typeof brazeBridge !== 'undefined') {
+                    Object.entries(attributes).forEach(([key, value]) => {
+                        brazeBridge.getUser().setCustomUserAttribute(key, value);
+                    });
+                    brazeBridge.requestImmediateDataFlush();
+                }
+            }
+        }
+
+        // OBLIGATOIRE : Memory Management
+        class GameMemoryManager {
+            constructor() {
+                this.intervals = [];
+                this.timeouts = [];
+                this.listeners = [];
+            }
+            
+            addTimeout(callback, delay) {
+                const id = setTimeout(callback, delay);
+                this.timeouts.push(id);
+                return id;
+            }
+            
+            cleanup() {
+                this.intervals.forEach(clearInterval);
+                this.timeouts.forEach(clearTimeout);
+                this.listeners.forEach(({element, event, handler}) => {
+                    element.removeEventListener(event, handler);
+                });
+            }
+        }
+
+        // OBLIGATOIRE : Reward System
+        class BrazeRewardSystem {
+            constructor(gameType) {
+                this.gameType = gameType;
+                this.rewardTiers = {
+                    bronze: { min: 0, max: 33, prefix: 'B' },
+                    silver: { min: 34, max: 66, prefix: 'S' },
+                    gold: { min: 67, max: 89, prefix: 'G' },
+                    platinum: { min: 90, max: 100, prefix: 'P' }
+                };
+            }
+            
+            calculateReward(performance) {
+                const tier = this.getTier(performance.efficiency_percent);
+                const code = this.generateCode(tier, performance);
+                
+                return {
+                    tier: tier,
+                    code: code,
+                    value: this.getRewardValue(tier),
+                    message: this.getRewardMessage(tier)
+                };
+            }
+            
+            getTier(efficiency) {
+                return Object.entries(this.rewardTiers)
+                    .find(([_, range]) => efficiency >= range.min && efficiency <= range.max)?.[0] || 'bronze';
+            }
+            
+            generateCode(tier, performance) {
+                const prefix = this.rewardTiers[tier].prefix;
+                const gameCode = this.gameType.substring(0, 3).toUpperCase();
+                const scoreCode = Math.floor(performance.score / 100);
+                const timestamp = Date.now().toString(36).substr(-4).toUpperCase();
+                return `${prefix}${gameCode}${scoreCode}${timestamp}`;
+            }
+
+            getRewardValue(tier) {
+                const values = {
+                    bronze: 10,
+                    silver: 15,
+                    gold: 20,
+                    platinum: 25
+                };
+                return values[tier] || 10;
+            }
+
+            getRewardMessage(tier) {
+                const messages = {
+                    bronze: "Good job! You've earned a bronze reward!",
+                    silver: "Great spin! You've won a silver prize!",
+                    gold: "Amazing! You've hit the gold jackpot!",
+                    platinum: "INCREDIBLE! You've achieved platinum status!"
+                };
+                return messages[tier] || messages.bronze;
+            }
+            
+            logReward(reward, gameTracker) {
+                gameTracker.trackEvent('reward_earned', {
+                    reward: {
+                        tier: reward.tier,
+                        code: reward.code,
+                        value: reward.value,
+                        type: 'discount'
+                    }
+                });
+            }
+        }
+
         // Rewards configuration with colors
         const rewards = [
-            { text: "20% OFF", emoji: "🎯", code: "SAVE20", message: "Save 20% on your next purchase!", color: "#FF6B35" },
-            { text: "FREE SHIP", emoji: "📦", code: "FREESHIP", message: "Enjoy free shipping on any order!", color: "#F7931E" },
-            { text: "10% OFF", emoji: "💰", code: "SAVE10", message: "Get 10% off your order!", color: "#FCEE21" },
-            { text: "MYSTERY", emoji: "🎁", code: "MYSTERY", message: "A surprise gift awaits you!", color: "#8BC34A" },
-            { text: "25% OFF", emoji: "🌟", code: "SAVE25", message: "Amazing! 25% off your purchase!", color: "#00BCD4" },
-            { text: "BOGO", emoji: "🎊", code: "BOGO2024", message: "Buy one, get one free!", color: "#9C27B0" },
-            { text: "15% OFF", emoji: "🎈", code: "SAVE15", message: "Enjoy 15% off today!", color: "#E91E63" },
-            { text: "FREE GIFT", emoji: "🎀", code: "FREEGIFT", message: "Claim your free gift now!", color: "#3F51B5" }
+            { text: "20% OFF", value: 85, color: "#FF6B35" },
+            { text: "FREE SHIP", value: 75, color: "#F7931E" },
+            { text: "10% OFF", value: 40, color: "#FCEE21" },
+            { text: "MYSTERY", value: 95, color: "#8BC34A" },
+            { text: "25% OFF", value: 90, color: "#00BCD4" },
+            { text: "BOGO", value: 100, color: "#9C27B0" },
+            { text: "15% OFF", value: 60, color: "#E91E63" },
+            { text: "5% OFF", value: 20, color: "#3F51B5" }
         ];
 
+        // Global variables
+        let gameTracker;
+        let memoryManager;
+        let rewardSystem;
         let isSpinning = false;
         let currentRotation = 0;
         let spinCount = 0;
-        let gameStartTime;
 
-        // Function to create SVG segments
+        // OBLIGATOIRE : Initialisation Braze
+        window.addEventListener("ab.BridgeReady", function() {
+            initializeGame();
+        }, false);
+        
+        // Fallback pour test hors Braze
+        if (typeof brazeBridge === 'undefined') {
+            document.addEventListener('DOMContentLoaded', initializeGame);
+        }
+        
+        function initializeGame() {
+            gameTracker = new BrazeGameTracker(GAME_CONFIG);
+            memoryManager = new GameMemoryManager();
+            rewardSystem = new BrazeRewardSystem(GAME_CONFIG.type);
+            
+            gameTracker.trackEvent('game_opened');
+            
+            createWheel();
+            setupAccessibility();
+        }
+
         function createWheel() {
             const wheelGroup = document.getElementById('wheel-group');
             const totalSegments = rewards.length;
@@ -449,20 +677,17 @@
             const centerY = 150;
 
             rewards.forEach((reward, index) => {
-                const startAngle = index * anglePerSegment - 90; // -90 to start at the top
+                const startAngle = index * anglePerSegment - 90;
                 const endAngle = startAngle + anglePerSegment;
                 
-                // Convert to radians
                 const startAngleRad = (startAngle * Math.PI) / 180;
                 const endAngleRad = (endAngle * Math.PI) / 180;
                 
-                // Calculate segment points
                 const x1 = centerX + radius * Math.cos(startAngleRad);
                 const y1 = centerY + radius * Math.sin(startAngleRad);
                 const x2 = centerX + radius * Math.cos(endAngleRad);
                 const y2 = centerY + radius * Math.sin(endAngleRad);
                 
-                // Create the segment path
                 const largeArcFlag = anglePerSegment > 180 ? 1 : 0;
                 const pathData = [
                     `M ${centerX} ${centerY}`,
@@ -471,28 +696,24 @@
                     'Z'
                 ].join(' ');
                 
-                // Create the segment
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 path.setAttribute('d', pathData);
                 path.setAttribute('fill', reward.color);
                 path.setAttribute('stroke', '#fff');
                 path.setAttribute('stroke-width', '2');
                 
-                // Calculate the text position (in the middle of the segment)
                 const textAngle = startAngle + anglePerSegment / 2;
                 const textAngleRad = (textAngle * Math.PI) / 180;
                 const textRadius = radius * 0.7;
                 const textX = centerX + textRadius * Math.cos(textAngleRad);
                 const textY = centerY + textRadius * Math.sin(textAngleRad);
                 
-                // Create the text
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', textX);
                 text.setAttribute('y', textY);
                 text.setAttribute('class', 'segment-text');
                 text.setAttribute('transform', `rotate(${textAngle + 90}, ${textX}, ${textY})`);
                 
-                // Adjust text color for the yellow segment
                 if (reward.color === '#FCEE21') {
                     text.style.fill = '#333';
                 }
@@ -504,21 +725,29 @@
             });
         }
 
-        // Game initialization
-        window.addEventListener("ab.BridgeReady", function() {
-            initializeGame();
-        }, false);
-
-        function initializeGame() {
-            gameStartTime = Date.now();
-            createWheel();
+        function setupAccessibility() {
+            const srStatus = document.getElementById('sr-status');
             
-            // Log game opening
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logCustomEvent("spin_wheel_game_opened", {
-                    timestamp: Date.now()
-                });
-            }
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('resultModal');
+                    if (modal.style.display === 'block') {
+                        playAgain();
+                    } else {
+                        closeGame();
+                    }
+                }
+                if (e.key === 'Enter' && e.target.id === 'spin-btn' && !isSpinning) {
+                    spinWheel();
+                }
+            });
+
+            memoryManager.listeners.push({
+                element: document,
+                event: 'keydown',
+                handler: arguments.callee
+            });
         }
 
         function spinWheel() {
@@ -526,107 +755,127 @@
 
             const spinBtn = document.getElementById('spin-btn');
             const wheel = document.getElementById('wheel');
+            const srStatus = document.getElementById('sr-status');
             
-            // Track the click on the spin button
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logClick("spin_button");
-                brazeBridge.logCustomEvent("wheel_spin_started", {
-                    spin_count: spinCount + 1
-                });
-            }
+            // Track the spin start
+            gameTracker.trackClick('spin_button');
+            gameTracker.trackEvent('game_started', {
+                performance: {
+                    actions_taken: spinCount + 1
+                }
+            });
 
             isSpinning = true;
             spinBtn.disabled = true;
             spinBtn.textContent = "SPINNING...";
+            srStatus.textContent = "Wheel is spinning, please wait...";
             
-            // Determine the winning segment (random)
+            // Determine the winning segment
             const totalSegments = rewards.length;
             const anglePerSegment = 360 / totalSegments;
             const winningIndex = Math.floor(Math.random() * totalSegments);
+            const winningReward = rewards[winningIndex];
             
-            // Calculate the angle for the winning segment to be at the top
+            // Calculate the final rotation
             const winningAngle = winningIndex * anglePerSegment;
-            
-            // Calculate the final rotation (multiple spins + final position)
-            const spins = 5 + Math.random() * 5; // 5-10 spins
+            const spins = 5 + Math.random() * 5;
             const finalRotation = currentRotation + (spins * 360) + (360 - winningAngle);
             
-            // Apply the rotation
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             currentRotation = finalRotation;
 
-            // Display the result after the animation
-            setTimeout(() => {
-                showResult(rewards[winningIndex]);
+            // Show result after animation
+            memoryManager.addTimeout(() => {
+                const performance = {
+                    score: winningReward.value * 100,
+                    efficiency_percent: winningReward.value,
+                    duration_seconds: Math.floor((Date.now() - gameTracker.startTime) / 1000),
+                    actions_taken: spinCount + 1,
+                    completion_status: 'completed'
+                };
+
+                const reward = rewardSystem.calculateReward(performance);
+                reward.originalText = winningReward.text;
+
+                showResult(reward, performance);
+                
                 isSpinning = false;
                 spinBtn.disabled = false;
                 spinBtn.textContent = "SPIN AGAIN!";
                 spinCount++;
                 
-                // Track the end of the spin
-                if (typeof brazeBridge !== 'undefined') {
-                    brazeBridge.logCustomEvent("wheel_spin_completed", {
-                        reward_won: rewards[winningIndex].text,
-                        reward_code: rewards[winningIndex].code,
-                        spin_count: spinCount,
-                        winning_index: winningIndex
-                    });
-                }
+                // Track completion
+                gameTracker.trackEvent('game_completed', {
+                    performance: performance,
+                    reward_info: {
+                        segment: winningReward.text,
+                        index: winningIndex
+                    }
+                });
+
+                rewardSystem.logReward(reward, gameTracker);
             }, 4000);
 
-            // Create confetti
             createConfetti();
         }
 
-        function showResult(reward) {
+        function showResult(reward, performance) {
             const modal = document.getElementById('resultModal');
             const emoji = document.getElementById('resultEmoji');
+            const tier = document.getElementById('resultTier');
             const message = document.getElementById('resultMessage');
             const code = document.getElementById('resultCode');
+            const srStatus = document.getElementById('sr-status');
             
-            emoji.textContent = reward.emoji;
-            message.textContent = reward.message;
+            emoji.textContent = reward.tier === 'platinum' ? '🏆' : 
+                               reward.tier === 'gold' ? '🥇' : 
+                               reward.tier === 'silver' ? '🥈' : '🥉';
+            
+            tier.textContent = reward.tier.toUpperCase();
+            tier.className = `result-tier tier-${reward.tier}`;
+            
+            message.textContent = `${reward.message} You won: ${reward.originalText}!`;
             code.textContent = reward.code;
             
             modal.style.display = 'block';
             modal.setAttribute('aria-hidden', 'false');
-            
-            // Log the result display
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logCustomEvent("reward_displayed", {
-                    reward_type: reward.text,
-                    reward_code: reward.code
-                });
-            }
+            srStatus.textContent = `Congratulations! You won ${reward.originalText} with a ${reward.tier} tier reward. Your code is ${reward.code}`;
         }
 
         function claimReward() {
             const code = document.getElementById('resultCode').textContent;
+            const tier = document.getElementById('resultTier').textContent.toLowerCase();
             
-            // Track the reward claim
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logClick("claim_reward");
-                brazeBridge.logCustomEvent("reward_claimed", {
-                    reward_code: code,
+            gameTracker.trackClick('claim_reward_button');
+            gameTracker.trackEvent('reward_claimed', {
+                reward: {
+                    code: code,
+                    tier: tier,
+                    claimed_at: Date.now()
+                },
+                performance: {
                     total_spins: spinCount,
-                    game_duration: Date.now() - gameStartTime
-                });
-                
-                // Update user attribute
-                brazeBridge.getUser().setCustomUserAttribute("last_spin_reward", code);
-                brazeBridge.getUser().setCustomUserAttribute("total_spins", spinCount);
-                brazeBridge.requestImmediateDataFlush();
-            }
+                    session_duration: Math.floor((Date.now() - gameTracker.startTime) / 1000)
+                }
+            });
             
-            // Copy the code to the clipboard if possible
+            // Update user attributes
+            gameTracker.updateUserAttributes({
+                last_spin_reward_code: code,
+                last_spin_reward_tier: tier,
+                total_spins_lifetime: spinCount,
+                last_game_played: GAME_CONFIG.type
+            });
+            
+            // Copy code to clipboard
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(code).then(() => {
                     alert(`Code ${code} copied to clipboard!`);
                 });
             }
             
-            // Close the game after claiming
-            setTimeout(() => {
+            // Close after claiming
+            memoryManager.addTimeout(() => {
                 closeGame();
             }, 1000);
         }
@@ -636,25 +885,34 @@
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
             
-            // Track the replay
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logClick("play_again");
-                brazeBridge.logCustomEvent("play_again_clicked", {
-                    after_spin_count: spinCount
-                });
-            }
+            gameTracker.trackClick('play_again_button');
+            
+            const srStatus = document.getElementById('sr-status');
+            srStatus.textContent = "Ready to spin again!";
         }
 
         function closeGame() {
-            // Track the closing
-            if (typeof brazeBridge !== 'undefined') {
-                brazeBridge.logClick();
-                brazeBridge.logCustomEvent("game_closed", {
+            const performance = {
+                score: spinCount * 1000,
+                duration_seconds: Math.floor((Date.now() - gameTracker.startTime) / 1000),
+                actions_taken: spinCount,
+                efficiency_percent: Math.min(100, spinCount * 20),
+                completion_status: spinCount > 0 ? 'completed' : 'abandoned'
+            };
+
+            gameTracker.trackClick('close_button');
+            gameTracker.trackEvent('game_closed', {
+                performance: performance,
+                context: {
                     total_spins: spinCount,
-                    total_duration: Date.now() - gameStartTime,
-                    last_action: "user_closed"
-                });
-                brazeBridge.requestImmediateDataFlush();
+                    last_action: 'user_closed'
+                }
+            });
+            
+            // Cleanup
+            memoryManager.cleanup();
+            
+            if (typeof brazeBridge !== 'undefined') {
                 brazeBridge.closeMessage();
             }
         }
@@ -663,7 +921,7 @@
             const colors = ['#FF6B35', '#F7931E', '#FCEE21', '#8BC34A', '#00BCD4', '#9C27B0'];
             
             for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
+                memoryManager.addTimeout(() => {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
                     confetti.style.left = Math.random() * 100 + '%';
@@ -672,37 +930,22 @@
                     confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
                     document.body.appendChild(confetti);
                     
-                    setTimeout(() => confetti.remove(), 4000);
+                    memoryManager.addTimeout(() => confetti.remove(), 4000);
                 }, i * 30);
             }
         }
-
-        // Keyboard management for accessibility
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const modal = document.getElementById('resultModal');
-                if (modal.style.display === 'block') {
-                    playAgain();
-                } else {
-                    closeGame();
-                }
-            }
-            if (e.key === 'Enter' && e.target.id === 'spin-btn' && !isSpinning) {
-                spinWheel();
-            }
-        });
-
-        // Initialization if brazeBridge is already ready
-        if (typeof brazeBridge !== 'undefined') {
-            initializeGame();
-        } else {
-            // If brazeBridge is not available, initialize anyway for testing
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof brazeBridge === 'undefined') {
-                    initializeGame();
+        
+        // OBLIGATOIRE : Gestion des erreurs
+        window.addEventListener('error', function(e) {
+            gameTracker?.trackEvent('game_error', {
+                error: {
+                    message: e.message,
+                    filename: e.filename,
+                    line: e.lineno,
+                    type: 'javascript_error'
                 }
             });
-        }
+        });
     </script>
 </body>
 </html>
