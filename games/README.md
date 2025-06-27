@@ -15,11 +15,11 @@ Interactive scratch-off cards revealing hidden prizes.
 - 📊 Engagement tracking
 
 ### 3. [Memory Game](./games/memory-game/)
-Classic card-matching game with customizable themes and difficulty levels.
-- 🃏 3 difficulty levels (Easy/Medium/Hard)
-- 🎨 4 built-in themes + custom options
-- ⏱️ Timer and efficiency tracking
-- 📊 Performance-based rewards
+Classic card-matching game with customizable themes.
+- 🃏 Multiple difficulty levels
+- 🎨 Custom card designs
+- ⏱️ Timer challenges
+- 📊 Performance tracking
 
 ### 4. [Slot Machine](./games/slot-machine/)
 A classic 3-reel slot machine with customizable rewards and smooth animations.
@@ -28,7 +28,14 @@ A classic 3-reel slot machine with customizable rewards and smooth animations.
 - 🎊 Win animations
 - 📊 Complete tracking
 
-### 5. [Hit the Target](./games/hit-the-target/) (Coming Soon)
+### 5. [Flame Catcher](./games/flame-catcher/)
+An exciting dropper game where players catch falling rewards while avoiding bombs.
+- 🔥 Official Braze mascot
+- 🎯 5 different item types
+- ❤️ Lives system
+- 📊 Progressive difficulty
+
+### 6. [Hit the Target](./games/hit-the-target/) (Coming Soon)
 Aim and shoot game with precision challenges.
 - 🎯 Multiple targets
 - 🏹 Accuracy scoring

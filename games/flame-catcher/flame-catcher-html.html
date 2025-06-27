@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flame Catcher - Braze Game</title>
+    <style>
+        /* Braze Brand Colors */
+        :root {
+            --primary-color: #FF6B35;
+            --secondary-color: #F7931E;
+            --accent-color: #A333C8;
+            --success-color: #21BA45;
+            --danger-color: #DB2828;
+            --dark-color: #1B1C1D;
+            --light-color: #FFFFFF;
+            --game-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            overflow: hidden;
+            background: var(--dark-color);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 700px;
+            background: var(--game-bg);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Header */
+        .game-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .score-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        #close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Game Area */
+        #game-area {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 120px;
+            overflow: hidden;
+        }
+
+        /* Falling Items */
+        .falling-item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.3));
+        }
+
+        /* Collector (Flame Character) */
+        #collector {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 80px;
+            background-image: url('https://cdn.braze.eu/appboy/communication/assets/image_assets/images/685d38dc0a367c00950cd7e8/original.png?1750939867');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: left 0.08s ease-out;
+            cursor: pointer;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        /* Start Screen */
+        .start-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-title {
+            font-size: 36px;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-subtitle {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255,107,53,0.5);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,107,53,0.7);
+        }
+
+        /* Game Over Screen */
+        .game-over-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-over-title {
+            font-size: 40px;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .final-score {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .high-score {
+            color: var(--secondary-color);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 20px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .play-again-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .claim-reward-button {
+            background: linear-gradient(135deg, var(--success-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-again-button:hover,
+        .claim-reward-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Particle Effects */
+        @keyframes sparkle {
+            0% { transform: translateY(0) scale(0); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1); opacity: 0; }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkle 0.8s ease-out forwards;
+        }
+
+        /* Touch controls hint */
+        .touch-hint {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        /* Reward message */
+        .reward-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--success-color);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .reward-text.show {
+            opacity: 1;
+        }
+
+        /* Bomb pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .penalty-bomb {
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        /* Responsive adjustments */
+        @media (max-height: 600px) {
+            .game-title { font-size: 28px; }
+            .start-button { padding: 15px 40px; font-size: 20px; }
+            #collector { width: 50px; height: 65px; }
+            .falling-item { width: 35px; height: 35px; font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" role="main" aria-label="Flame Catcher Game">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="score-display">
+                <div class="score-item">
+                    <span class="score-label">Score</span>
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Lives</span>
+                    <span class="score-value" id="lives">5</span>
+                </div>
+            </div>
+            <button id="close-btn" aria-label="Close game" onclick="closeGame()">×</button>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area"></div>
+        
+        <!-- Collector -->
+        <div id="collector" role="img" aria-label="Flame collector"></div>
+        
+        <!-- Touch Hint -->
+        <div class="touch-hint" id="touch-hint">Drag to move • Don't miss rewards • Avoid bombs!</div>
+
+        <!-- Reward Text -->
+        <div class="reward-text" id="reward-text">+10</div>
+
+        <!-- Start Screen -->
+        <div class="start-screen" id="start-screen">
+            <h1 class="game-title">🔥 Flame Catcher</h1>
+            <p class="game-subtitle">Catch rewards and boost your score!</p>
+            <p class="game-subtitle" style="color: var(--secondary-color);">High Score: <span id="start-high-score">0</span></p>
+            <button class="start-button" onclick="startGame()">PLAY NOW!</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="game-over-screen" id="game-over-screen">
+            <h2 class="game-over-title">🎉 Great Job!</h2>
+            <p class="final-score">Final Score: <span id="final-score">0</span></p>
+            <p class="high-score">High Score: <span id="final-high-score">0</span></p>
+            <div class="game-over-buttons">
+                <button class="play-again-button" onclick="playAgain()">Play Again</button>
+                <button class="claim-reward-button" onclick="claimReward()">Claim Reward</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game configuration
+        const config = {
+            rewards: [
+                { emoji: '🪙', points: 10, weight: 40, name: 'coin' },
+                { emoji: '⭐', points: 20, weight: 30, name: 'star' },
+                { emoji: '💎', points: 30, weight: 20, name: 'gem' },
+                { emoji: '❤️', points: 50, weight: 5, name: 'heart' },
+                { emoji: '💣', points: -25, weight: 15, name: 'bomb', isPenalty: true }
+            ],
+            difficulties: [
+                { time: 0, dropSpeed: 1200, fallSpeed: 2 },
+                { time: 8000, dropSpeed: 900, fallSpeed: 1.8, simultaneous: 2 },
+                { time: 15000, dropSpeed: 700, fallSpeed: 1.5, simultaneous: 2 },
+                { time: 25000, dropSpeed: 500, fallSpeed: 1.2, simultaneous: 3 }
+            ],
+            maxLives: 5,
+            gameDuration: 60000, // 60 seconds
+            rewardTiers: [
+                { minScore: 1000, reward: '30% OFF', code: 'MASTER30' },
+                { minScore: 500, reward: '25% OFF', code: 'GREAT25' },
+                { minScore: 250, reward: '20% OFF', code: 'GOOD20' },
+                { minScore: 0, reward: '15% OFF', code: 'PLAY15' }
+            ]
+        };
+
+        // Game state
+        let gameState = {
+            score: 0,
+            highScore: 0,
+            lives: config.maxLives,
+            active: false,
+            startTime: null,
+            dropInterval: null,
+            currentDifficulty: 0,
+            sessionId: Date.now()
+        };
+
+        // DOM elements
+        let collector, gameArea, touchOffset = 0;
+
+        // Wait for Braze Bridge
+        window.addEventListener("ab.BridgeReady", function() {
+            initializeGame();
+            brazeBridge.logCustomEvent("flame_catcher_opened", {
+                session_id: gameState.sessionId
+            });
+        }, false);
+
+        // Initialize for testing without Braze
+        if (typeof brazeBridge === 'undefined') {
+            window.addEventListener('DOMContentLoaded', initializeGame);
+        }
+
+        function initializeGame() {
+            collector = document.getElementById('collector');
+            gameArea = document.getElementById('game-area');
+            
+            // Load high score
+            try {
+                // In production: gameState.highScore = brazeBridge.getUser().getCustomUserAttribute("flame_catcher_high_score") || 0;
+                gameState.highScore = parseInt(localStorage.getItem('flame_catcher_high_score') || '0');
+                document.getElementById('start-high-score').textContent = gameState.highScore;
+                document.getElementById('final-high-score').textContent = gameState.highScore;
+            } catch(e) {
+                console.log('Could not load high score');
+            }
+            
+            document.getElementById('lives').textContent = config.maxLives;
+            setupControls();
+        }
+
+        function setupControls() {
+            let isDragging = false;
+            
+            // Desktop controls
+            collector.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                touchOffset = e.clientX - collector.offsetLeft - collector.offsetWidth / 2;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging && gameState.active) {
+                    moveCollector(e.clientX - touchOffset);
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            // Touch controls
+            collector.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                const touch = e.touches[0];
+                touchOffset = touch.clientX - collector.offsetLeft - collector.offsetWidth / 2;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (isDragging && gameState.active) {
+                    const touch = e.touches[0];
+                    moveCollector(touch.clientX - touchOffset);
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+            });
+            
+            // Keyboard controls
+            document.addEventListener('keydown', function(e) {
+                if (!gameState.active) return;
+                
+                const currentLeft = collector.offsetLeft;
+                const step = 30;
+                
+                if (e.key === 'ArrowLeft') {
+                    moveCollector(currentLeft - step + collector.offsetWidth / 2);
+                } else if (e.key === 'ArrowRight') {
+                    moveCollector(currentLeft + step + collector.offsetWidth / 2);
+                }
+            });
+        }
+
+        function moveCollector(x) {
+            const containerWidth = document.getElementById('game-container').offsetWidth;
+            const collectorWidth = collector.offsetWidth;
+            const minX = collectorWidth / 2;
+            const maxX = containerWidth - collectorWidth / 2;
+            
+            x = Math.max(minX, Math.min(maxX, x));
+            collector.style.left = (x - collectorWidth / 2) + 'px';
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('touch-hint').style.display = 'block';
+            
+            // Reset game state
+            gameState.score = 0;
+            gameState.lives = config.maxLives;
+            gameState.active = true;
+            gameState.startTime = Date.now();
+            gameState.currentDifficulty = 0;
+            
+            updateDisplay();
+            gameArea.innerHTML = '';
+            
+            // Start dropping items
+            scheduleDifficulty();
+            
+            // Hide touch hint after 2 seconds
+            setTimeout(() => {
+                document.getElementById('touch-hint').style.display = 'none';
+            }, 2000);
+            
+            // Log game start
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("flame_catcher_started", {
+                    high_score: gameState.highScore,
+                    session_id: gameState.sessionId
+                });
+                brazeBridge.logClick("start_game");
+            }
+            
+            // Auto-end game after duration
+            setTimeout(() => {
+                if (gameState.active) {
+                    endGame();
+                }
+            }, config.gameDuration);
+        }
+
+        function scheduleDifficulty() {
+            const difficulty = config.difficulties[gameState.currentDifficulty];
+            
+            // Clear existing interval
+            if (gameState.dropInterval) {
+                clearInterval(gameState.dropInterval);
+            }
+            
+            // Start new interval
+            gameState.dropInterval = setInterval(() => dropItem(), difficulty.dropSpeed);
+            
+            // Drop simultaneous items
+            if (difficulty.simultaneous) {
+                for (let i = 1; i < difficulty.simultaneous; i++) {
+                    setTimeout(() => dropItem(), i * 200);
+                }
+            }
+            
+            // Schedule next difficulty
+            if (gameState.currentDifficulty < config.difficulties.length - 1) {
+                const nextDifficulty = config.difficulties[gameState.currentDifficulty + 1];
+                const timeToNext = nextDifficulty.time - difficulty.time;
+                
+                setTimeout(() => {
+                    if (gameState.active) {
+                        gameState.currentDifficulty++;
+                        scheduleDifficulty();
+                    }
+                }, timeToNext);
+            }
+        }
+
+        function getWeightedRandomReward() {
+            const totalWeight = config.rewards.reduce((sum, reward) => sum + reward.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const reward of config.rewards) {
+                random -= reward.weight;
+                if (random <= 0) {
+                    return reward;
+                }
+            }
+            
+            return config.rewards[0];
+        }
+
+        function dropItem() {
+            if (!gameState.active) return;
+            
+            const item = document.createElement('div');
+            const reward = getWeightedRandomReward();
+            const difficulty = config.difficulties[gameState.currentDifficulty];
+            
+            item.className = 'falling-item' + (reward.isPenalty ? ' penalty-bomb' : '');
+            item.textContent = reward.emoji;
+            item.dataset.points = reward.points;
+            item.dataset.name = reward.name;
+            
+            // Random horizontal position
+            const containerWidth = document.getElementById('game-container').offsetWidth;
+            const itemWidth = 40;
+            const maxX = containerWidth - itemWidth;
+            item.style.left = Math.random() * maxX + 'px';
+            item.style.top = '-40px';
+            
+            gameArea.appendChild(item);
+            
+            // Animate falling
+            const fallDuration = difficulty.fallSpeed * 1000;
+            const startTime = Date.now();
+            const startTop = -40;
+            const endTop = gameArea.offsetHeight;
+            
+            function animateFall() {
+                if (!gameState.active) {
+                    item.remove();
+                    return;
+                }
+                
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / fallDuration;
+                
+                if (progress >= 1) {
+                    // Item reached bottom
+                    if (!reward.isPenalty) {
+                        gameState.lives--;
+                        updateDisplay();
+                        
+                        // Flash lives indicator
+                        const livesElement = document.getElementById('lives').parentElement;
+                        livesElement.style.background = 'rgba(219, 40, 40, 0.5)';
+                        setTimeout(() => {
+                            livesElement.style.background = 'rgba(255,255,255,0.2)';
+                        }, 300);
+                        
+                        if (gameState.lives <= 0) {
+                            endGame();
+                            return;
+                        }
+                    }
+                    item.remove();
+                    return;
+                }
+                
+                const currentTop = startTop + (endTop - startTop) * progress;
+                item.style.top = currentTop + 'px';
+                
+                if (checkCollision(item)) {
+                    collectItem(item);
+                    return;
+                }
+                
+                requestAnimationFrame(animateFall);
+            }
+            
+            requestAnimationFrame(animateFall);
+        }
+
+        function checkCollision(item) {
+            const itemRect = item.getBoundingClientRect();
+            const collectorRect = collector.getBoundingClientRect();
+            
+            return !(itemRect.right < collectorRect.left || 
+                     itemRect.left > collectorRect.right || 
+                     itemRect.bottom < collectorRect.top || 
+                     itemRect.top > collectorRect.bottom);
+        }
+
+        function collectItem(item) {
+            const points = parseInt(item.dataset.points);
+            const name = item.dataset.name;
+            
+            if (points < 0) {
+                // Bomb collected
+                gameArea.style.background = 'rgba(219, 40, 40, 0.3)';
+                setTimeout(() => {
+                    gameArea.style.background = 'transparent';
+                }, 200);
+            } else {
+                // Reward collected
+                createSparkle(item.offsetLeft + 20, item.offsetTop + 20);
+                showRewardText(points, item.offsetLeft + 20, item.offsetTop);
+            }
+            
+            gameState.score = Math.max(0, gameState.score + points);
+            updateDisplay();
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick(`collect_${name}`);
+            }
+            
+            item.remove();
+        }
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            gameArea.appendChild(sparkle);
+            
+            setTimeout(() => sparkle.remove(), 800);
+        }
+
+        function showRewardText(points, x, y) {
+            const text = document.getElementById('reward-text');
+            text.textContent = `+${points}`;
+            text.style.left = x + 'px';
+            text.style.top = y + 'px';
+            text.classList.add('show');
+            
+            setTimeout(() => {
+                text.classList.remove('show');
+            }, 800);
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('lives').textContent = gameState.lives;
+            
+            if (gameState.score > gameState.highScore) {
+                gameState.highScore = gameState.score;
+                document.getElementById('start-high-score').textContent = gameState.highScore;
+                document.getElementById('final-high-score').textContent = gameState.highScore;
+            }
+        }
+
+        function endGame() {
+            gameState.active = false;
+            clearInterval(gameState.dropInterval);
+            
+            gameArea.innerHTML = '';
+            
+            const playDuration = Math.floor((Date.now() - gameState.startTime) / 1000);
+            
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-high-score').textContent = gameState.highScore;
+            document.getElementById('game-over-screen').style.display = 'flex';
+            
+            // Log game completion
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logCustomEvent("flame_catcher_completed", {
+                    final_score: gameState.score,
+                    high_score: gameState.highScore,
+                    play_duration: playDuration,
+                    items_collected: Math.floor(gameState.score / 20),
+                    lives_lost: config.maxLives - gameState.lives,
+                    game_over_reason: gameState.lives <= 0 ? "no_lives" : "time_up",
+                    session_id: gameState.sessionId
+                });
+                
+                if (gameState.score === gameState.highScore) {
+                    brazeBridge.getUser().setCustomUserAttribute("flame_catcher_high_score", gameState.highScore);
+                    brazeBridge.getUser().setCustomUserAttribute("flame_catcher_last_played", new Date().toISOString());
+                }
+                
+                brazeBridge.requestImmediateDataFlush();
+            } else {
+                // For testing
+                localStorage.setItem('flame_catcher_high_score', gameState.highScore.toString());
+            }
+        }
+
+        function playAgain() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            startGame();
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("play_again");
+            }
+        }
+
+        function claimReward() {
+            const tier = config.rewardTiers.find(t => gameState.score >= t.minScore);
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("claim_reward");
+                brazeBridge.logCustomEvent("flame_catcher_reward_claimed", {
+                    game_type: "flame_catcher",
+                    score: gameState.score,
+                    reward_tier: tier.reward,
+                    reward_code: tier.code,
+                    session_id: gameState.sessionId
+                });
+                brazeBridge.requestImmediateDataFlush();
+            }
+            
+            alert(`🎉 Reward Claimed!\n\n${tier.reward}\nCode: ${tier.code}\n\nCheck your rewards page.`);
+            closeGame();
+        }
+
+        function closeGame() {
+            const sessionDuration = Date.now() - gameState.sessionId;
+            
+            if (typeof brazeBridge !== 'undefined') {
+                brazeBridge.logClick("close_button");
+                brazeBridge.logCustomEvent("flame_catcher_closed", {
+                    session_duration: Math.floor(sessionDuration / 1000),
+                    final_score: gameState.score,
+                    session_id: gameState.sessionId
+                });
+                brazeBridge.closeMessage();
+            }
+        }
+    </script>
+</body>
+</html>
