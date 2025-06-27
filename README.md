@@ -14,7 +14,7 @@ Interactive scratch-off cards revealing hidden prizes.
 - ✨ Particle effects
 - 📊 Engagement tracking
 
-### 3. [Memory Game](./games/memory-game/) (Coming Soon)
+### 3. [Memory Game](./games/memory-game/)
 Classic card-matching game with customizable themes.
 - 🃏 Multiple difficulty levels
 - 🎨 Custom card designs
