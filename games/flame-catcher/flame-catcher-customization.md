@@ -619,7 +619,7 @@ const config = {
 - [ ] Validate all text content
 - [ ] Test offline functionality
 - [ ] Verify performance (< 50KB)
-- [ ] Check accessibility features
+- [ ] Check accessibility features (keyboard nav, zoom support)
 - [ ] Test with real user accounts
 - [ ] Verify reward codes work
 - [ ] Test edge cases (0 score, max score)

@@ -12,7 +12,7 @@
 - ❤️ **Lives System** - 5 lives, lose one for each missed reward
 - 🏆 **High Score Tracking** - Persistent high scores via user attributes
 - 📱 **Fully Responsive** - Works perfectly on all devices and orientations
-- ♿ **Accessible** - Keyboard navigation and screen reader support
+- ♿ **Accessible** - Keyboard navigation, screen reader support, and pinch-to-zoom enabled
 - 📊 **Complete Analytics** - Tracks every interaction and game event
 - 🚀 **Lightweight** - Only ~25KB total size
 - 🔌 **No Dependencies** - Pure HTML/CSS/JavaScript
@@ -236,6 +236,7 @@ if (playsToday >= 3) {
 - ✅ Firefox 75+
 - ✅ iOS Safari 13+
 - ✅ Chrome Android 80+
+- ✅ Pinch-to-zoom supported on all mobile browsers
 
 ## 🎮 Game Mechanics
 
@@ -277,6 +278,8 @@ if (playsToday >= 3) {
 - Clear visual feedback
 - Support keyboard navigation
 - Test with screen readers
+- Allow pinch-to-zoom for users with visual impairments
+- Use semantic HTML elements
 
 ## 🎨 Design Tips
 

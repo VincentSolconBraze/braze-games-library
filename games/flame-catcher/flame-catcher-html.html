@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flame Catcher - Braze Game</title>
     <style>
         /* Braze Brand Colors */
@@ -24,6 +24,7 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+            touch-action: manipulation; /* Allows zooming but prevents other touch gestures */
         }
 
         body {
@@ -45,6 +46,7 @@
             background: var(--game-bg);
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transform-origin: center center; /* Ensures proper zoom behavior */
         }
 
         /* Header */
