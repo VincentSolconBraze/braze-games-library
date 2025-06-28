@@ -360,4 +360,4 @@ MIT - Free to use and modify for your Braze campaigns!
 
 ---
 
-Need help? Check the main [Braze Games Library](https://github.com/VincentSolconBraze/braze-games-library) documentation or open an issue!
+Need help? Check the main [Braze Games Library](https://github.com/VincentSolconBraze/braze-games-library) documentation!
