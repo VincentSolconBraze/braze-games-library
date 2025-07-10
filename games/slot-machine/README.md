@@ -281,8 +281,10 @@ See [CONTRIBUTING.md](https://github.com/VincentSolconBraze/braze-games-library/
 
 ## 🙋 Need Help?
 
+- 📧 Contact your Braze Customer Success Manager
 - 📚 Review [Braze HTML In-App Messages docs](https://www.braze.com/docs)
 - 🎮 Check other games in the [Braze Games Library](https://github.com/VincentSolconBraze/braze-games-library)
+- 💬 Open an issue on GitHub
 
 ---
 
