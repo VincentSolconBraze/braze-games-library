@@ -729,7 +729,7 @@
             const srStatus = document.getElementById('sr-status');
             
             // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
+            const keydownHandler = (e) => {
                 if (e.key === 'Escape') {
                     const modal = document.getElementById('resultModal');
                     if (modal.style.display === 'block') {
@@ -741,12 +741,14 @@
                 if (e.key === 'Enter' && e.target.id === 'spin-btn' && !isSpinning) {
                     spinWheel();
                 }
-            });
+            };
+            
+            document.addEventListener('keydown', keydownHandler);
 
             memoryManager.listeners.push({
                 element: document,
                 event: 'keydown',
-                handler: arguments.callee
+                handler: keydownHandler
             });
         }
 

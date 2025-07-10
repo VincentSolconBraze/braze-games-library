@@ -1285,7 +1285,7 @@
                 const seconds = elapsed % 60;
                 document.getElementById('timer-display').textContent = 
                     `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }, 100);
+            }, 1000);
         }
         
         function updateMovesDisplay() {

@@ -865,8 +865,13 @@
             const stopPosition = -(symbolIndex * 120);
             reel.style.transform = `translateY(${stopPosition}px)`;
 
-            // Store the result
-            slotResults[reelIndex] = config.symbols[symbolIndex];
+            // Get the actual visible symbol based on reel structure
+            // Each reel has 2 sets of symbols (12 total), we need the middle visible one
+            // The visible symbol is at position 5 - symbolIndex when stopped
+            const visibleSymbolIndex = (5 - symbolIndex + 6) % 6;
+            
+            // Store the correct visible symbol result
+            slotResults[reelIndex] = config.symbols[visibleSymbolIndex];
         }
 
         function checkWinCondition() {
