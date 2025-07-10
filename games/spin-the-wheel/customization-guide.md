@@ -341,5 +341,3 @@ If you encounter issues:
 Remember: The game is designed to work out-of-the-box. Only customize what you need to change for your campaign goals.
 
 ---
-
-For technical support, consult your Braze CSM or engineering team.
